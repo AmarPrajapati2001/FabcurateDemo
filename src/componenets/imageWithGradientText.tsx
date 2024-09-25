@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, ImageBackground, StyleSheet, Dimensions } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+
+const screenWidth = Dimensions.get('window').width;
 
 const ImageWithGradientText = ({ imageUri, text }: { imageUri: string, text: string }) => {
     return (
@@ -21,7 +23,7 @@ const ImageWithGradientText = ({ imageUri, text }: { imageUri: string, text: str
 const styles = StyleSheet.create({
     fabricItem: {
         height: 120,
-        width: 120,
+        width: screenWidth / 3.1,
         borderRadius: 60,
         margin: 2,
         overflow: 'hidden',
