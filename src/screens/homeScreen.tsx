@@ -30,18 +30,6 @@ const HomeScreen = () => {
 
     const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
-    const combinedData = [
-        { title: 'Top Menu', data: data?.top },
-        { title: 'Slider', data: data?.top[0]?.slider_images || [] },
-        { title: 'Shop By Category', data: data?.middle?.shop_by_category || [] },
-        { title: 'Shop By Fabric Material', data: data?.middle?.shop_by_fabric || [] },
-        { title: 'Unstitched', data: data?.middle?.Unstitched || [] },
-        { title: 'Boutique Collection', data: data?.middle?.boutique_collection || [] },
-        { title: 'Range of Pattern', data: data?.bottom?.range_of_pattern.slice(0, 6) || [] },
-        { title: 'Design As Per Occasion', data: data?.bottom?.design_occasion || [] },
-    ];
-
-
     const fetchData = async () => {
         try {
             const [menuResponse, patternResponse, occasionResponse] = await Promise.all([
