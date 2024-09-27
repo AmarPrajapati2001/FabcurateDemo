@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, SafeAreaView, Image, ImageBackground, Dimensions, Animated, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    FlatList,
+    ActivityIndicator,
+    StyleSheet,
+    SafeAreaView,
+    Image,
+    ImageBackground,
+    Dimensions,
+    Animated,
+} from 'react-native';
 import axios from 'axios';
 import Header from '../componenets/heder';
 import Title from '../componenets/title';
@@ -117,113 +128,162 @@ const HomeScreen = () => {
             name={item.name} />
     );
 
-    return (
-        <SafeAreaView style={styles.container} >
-            <Header />
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <FlatList
-                    data={data.top}
-                    keyExtractor={(item) => item.title}
-                    renderItem={renderMenuItem}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.flatList}
-                />
-                <Animated.FlatList
-                    ref={flatListRef}
-                    data={data.top[0]?.slider_images}
-                    keyExtractor={(item) => item.title}
-                    renderItem={renderSliderItem}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    snapToAlignment="center"
-                    snapToInterval={screenWidth / 1.2 + 14}
-                    decelerationRate="fast"
-                    onScroll={Animated.event(
-                        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                        { useNativeDriver: false }
-                    )}
-                    onViewableItemsChanged={onViewRef.current}
-                    viewabilityConfig={viewConfigRef.current}
-                    contentContainerStyle={styles.sliderList}
-                />
-                <Title title="Shop By Category" />
-                <FlatList
-                    data={data?.middle?.shop_by_category}
-                    keyExtractor={(item) => item.category_id}
-                    renderItem={renderShopByCategory}
-                    numColumns={3}
-                    showsHorizontalScrollIndicator={false}
-                />
-                <Title title="Shop By Fabric Material" />
-                <FlatList
-                    data={data?.middle?.shop_by_fabric}
-                    keyExtractor={(item) => item.fabric_id}
-                    renderItem={renderShopByFabricMaterial}
-                    numColumns={3}
-                    showsHorizontalScrollIndicator={false}
-                />
-                <Title title="Unstitched" />
-                <Animated.FlatList
-                    data={data?.middle?.Unstitched}
-                    renderItem={({ item, index }) => <UnstitchedItem item={item} index={index} scrollX={scrollX} />}
-                    keyExtractor={item => item.range_id}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    snapToAlignment="center"
-                    snapToInterval={screenWidth * 0.7}
-                    decelerationRate="fast"
-                    onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
-                    style={styles.flatList}
-                />
-                <View >
-                    <Title title="Boutique Collection" />
-                    <SwiperFlatList
-                        autoplay
-                        autoplayDelay={3}
-                        autoplayLoop
-                        showPagination
-                        keyExtractor={item => item?.name}
-                        paginationStyle={styles.paginationStyle}
-                        paginationStyleItem={styles.paginationStyleItem}
-                        style={{ height: 500 }}
-                        paginationActiveColor="#000"
-                        paginationDefaultColor="#ccc"
-                        data={data?.middle?.boutique_collection}
-                        renderItem={({ item }) => (
-                            <ImageBackground
-                                source={{ uri: item?.banner_image }}
-                                style={styles.imageBackgroundCollection}
-                            >
-                                <LinearGradient
-                                    colors={['transparent', 'black']}
-                                    style={styles.gradient}
-                                >
-                                    <Text style={styles.itemText}>{item?.name.toUpperCase()}</Text>
-                                    <Text style={styles.explore}>+EXPLORE</Text>
-                                </LinearGradient>
-                            </ImageBackground>
-                        )}
-                    />
-                </View>
-                <Title title="Range of Pattern" />
-                <FlatList
-                    data={data?.bottom?.range_of_pattern.slice(0, 6)}
-                    keyExtractor={(item) => item.product_id}
-                    renderItem={renderShopByFabricMaterial}
-                    numColumns={3}
-                    showsHorizontalScrollIndicator={false}
-                />
-                <Title title="Design As Per Occasion" />
-                <FlatList
-                    data={data?.bottom?.design_occasion}
-                    keyExtractor={(item) => item.product_id}
-                    renderItem={renderOccasion}
-                    numColumns={3}
-                    showsHorizontalScrollIndicator={false}
-                />
-            </ScrollView>
+    const combinedData = [
+        { type: 'menu', data: data.top },  // Horizontal Menu
+        { type: 'slider', data: data.top[0]?.slider_images },  // Slider Images
+        { type: 'title', title: 'Shop By Category' },
+        { type: 'category', data: data?.middle?.shop_by_category },  // Shop By Category
+        { type: 'title', title: 'Shop By Fabric Material' },
+        { type: 'fabric', data: data?.middle?.shop_by_fabric },  // Shop By Fabric Material
+        { type: 'title', title: 'Unstitched' },
+        { type: 'unstitched', data: data?.middle?.Unstitched },  // Unstitched
+        { type: 'title', title: 'Boutique Collection' },  // **Added Title for Boutique Collection**
+        { type: 'boutique', data: data?.middle?.boutique_collection },  // Boutique Collection
+        { type: 'title', title: 'Range of Pattern' },
+        { type: 'pattern', data: data?.bottom?.range_of_pattern.slice(0, 6) },  // Range of Pattern
+        { type: 'title', title: 'Design As Per Occasion' },
+        { type: 'occasion', data: data?.bottom?.design_occasion },  // Design By Occasion
+    ];
 
+    const renderItem = ({ item }) => {
+        switch (item.type) {
+            case 'menu':
+                return (
+                    <FlatList
+                        data={item.data}
+                        keyExtractor={(menuItem) => menuItem.title}
+                        renderItem={renderMenuItem}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.flatList}
+                    />
+                );
+            case 'slider':
+                return (
+                    <Animated.FlatList
+                        ref={flatListRef}
+                        data={item.data}
+                        keyExtractor={(sliderItem) => sliderItem.title}
+                        renderItem={renderSliderItem}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        snapToAlignment="center"
+                        snapToInterval={screenWidth / 1.2 + 14}
+                        decelerationRate="fast"
+                        onScroll={Animated.event(
+                            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                            { useNativeDriver: false }
+                        )}
+                        onViewableItemsChanged={onViewRef.current}
+                        viewabilityConfig={viewConfigRef.current}
+                        contentContainerStyle={styles.sliderList}
+                    />
+                );
+            case 'title':
+                return <Title title={item.title} />;
+            case 'category':
+                return (
+                    <FlatList
+                        data={item.data}
+                        keyExtractor={(categoryItem) => categoryItem.category_id}
+                        renderItem={renderShopByCategory}
+                        numColumns={3}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                );
+            case 'fabric':
+                return (
+                    <FlatList
+                        data={item.data}
+                        keyExtractor={(fabricItem) => fabricItem.fabric_id}
+                        renderItem={renderShopByFabricMaterial}
+                        numColumns={3}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                );
+            case 'unstitched':
+                return (
+                    <Animated.FlatList
+                        data={item.data}
+                        renderItem={({ item, index }) => <UnstitchedItem item={item} index={index} scrollX={scrollX} />}
+                        keyExtractor={(unstitchedItem) => unstitchedItem.range_id}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        snapToAlignment="center"
+                        snapToInterval={screenWidth * 0.7}
+                        decelerationRate="fast"
+                        onScroll={Animated.event(
+                            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                            { useNativeDriver: false }
+                        )}
+                        style={styles.flatList}
+                    />
+                );
+            case 'boutique':
+                return (
+                    <View >
+                        <SwiperFlatList
+                            autoplay
+                            autoplayDelay={3}
+                            autoplayLoop
+                            showPagination
+                            paginationStyle={styles.paginationStyle}
+                            paginationStyleItem={styles.paginationStyleItem}
+                            style={{ height: 500 }}
+                            paginationActiveColor="#000"
+                            paginationDefaultColor="#ccc"
+                            data={item.data}
+                            renderItem={({ item }) => (
+                                <ImageBackground
+                                    source={{ uri: item?.banner_image }}
+                                    style={styles.imageBackgroundCollection}
+                                >
+                                    <LinearGradient
+                                        colors={['transparent', 'black']}
+                                        style={styles.gradient}
+                                    >
+                                        <Text style={styles.itemText}>{item?.name.toUpperCase()}</Text>
+                                        <Text style={styles.explore}>+EXPLORE</Text>
+                                    </LinearGradient>
+                                </ImageBackground>
+                            )}
+                        />
+                    </View>
+                );
+            case 'pattern':
+                return (
+                    <FlatList
+                        data={item.data}
+                        keyExtractor={(patternItem) => patternItem.product_id}
+                        renderItem={renderShopByFabricMaterial}
+                        numColumns={3}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                );
+            case 'occasion':
+                return (
+                    <FlatList
+                        data={item.data}
+                        keyExtractor={(occasionItem) => occasionItem.product_id}
+                        renderItem={renderOccasion}
+                        numColumns={3}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <Header />
+            <FlatList
+                data={combinedData}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                showsVerticalScrollIndicator={false}
+            />
         </SafeAreaView>
     );
 };
